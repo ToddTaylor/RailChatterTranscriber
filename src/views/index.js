@@ -1,4 +1,4 @@
-import { containsDirection, containsDetector, getTime, replaceWords } from '../string-utils.js';
+import { containsDirection, containsDetector, capitalizeFirstLetter, getTime, replaceNonAlphNumericCharacters, replaceWords } from '../string-utils.js';
 
 let recognition = null;
 let finalTranscript = '';
@@ -203,7 +203,7 @@ function setupSpeechAPI() {
     }
 }
 
-export function processDetectorCaption(hotboxTranscript) {
+function processDetectorCaption(hotboxTranscript) {
 
     hotboxTranscript = replaceWords(hotboxTranscript);
     hotboxTranscript = replaceNonAlphNumericCharacters(hotboxTranscript);
@@ -279,12 +279,6 @@ export function processDetectorCaption(hotboxTranscript) {
     return '';
 }
 
-// Helper function to capitalize the first letter of a string.
-function capitalizeFirstLetter(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-
 function spanErrorIcon() {
     return spanTimestamp() + ' <i class=\'fa-solid fa-circle-exclamation fa-sm\' title=\'Error\'></i>';
 }
@@ -297,10 +291,6 @@ function spanTimestamp() {
     return '<span style=\'color:#999999;\'>' + getTime() + '</span> ';
 }
 
-function replaceNonAlphNumericCharacters(transcript) {
-    return transcript.replace(/[^a-zA-Z\d\s.]/g, '');
-}
-
 function signalSourceIconChooser(transcript) {
     if (transcript.toLowerCase().includes('detector')) {
         return '<i class=\'fa-solid fa-tower-broadcast fa-sm\' title=\'Hot Box Detector\'></i>';
@@ -308,3 +298,5 @@ function signalSourceIconChooser(transcript) {
 
     return '<i class=\'fa-solid fa-walkie-talkie fa-sm\' title=\'Walkie-Talkie\'></i>';
 }
+
+export { processDetectorCaption };

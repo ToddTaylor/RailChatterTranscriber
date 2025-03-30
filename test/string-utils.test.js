@@ -1,5 +1,14 @@
 // https://medium.com/@akkutyagi/how-to-debug-jest-tests-in-vs-code-8594b7ea02dc
-import { containsDetector, containsDirection, getTime, replaceNonAlphNumericCharacters, replaceWords } from '../src/string-utils.js';
+import {
+    containsDetector,
+    containsDirection,
+    getTime,
+    replaceNonAlphNumericCharacters,
+    replaceWords,
+    capitalizeFirstLetter,
+    removeSpecialCharacters,
+    removeExtraSpaces
+} from '../src/string-utils.js';
 
 describe("String-Utils Test Cases", () => {
     test("Contains 'detector'", () => {

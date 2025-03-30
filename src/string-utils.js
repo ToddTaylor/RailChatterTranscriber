@@ -17,13 +17,13 @@ wordDictionary.push(
     { searchMask: "thou found", replaceWord: "southbound" },
 );
 
-export function containsDetector(transcript) {
+function containsDetector(transcript) {
     return transcript.toLowerCase().includes('detector');
 }
 
 let directions = ["north", "south", "east", "west"];
 
-export function containsDirection(transcript) {
+function containsDirection(transcript) {
     for (let i = 0; i < directions.length; i++) {
         if (transcript.toLowerCase().includes(directions[i])) {
             return true;
@@ -38,7 +38,7 @@ export function containsDirection(transcript) {
  * @returns Returns the current time in a human-readable
  * format (e.g., 12:00:00 PM).
  */
-export function getTime() {
+function getTime() {
     let date = new Date();
 
     let options = {
@@ -51,7 +51,7 @@ export function getTime() {
     return date.toLocaleString('en-US', options);
 }
 
-export function replaceNonAlphNumericCharacters(transcript) {
+function replaceNonAlphNumericCharacters(transcript) {
     return transcript.replace(/[^a-zA-Z\d\s.]/g, '');
 }
 
@@ -60,7 +60,7 @@ export function replaceNonAlphNumericCharacters(transcript) {
  * @param {*} transcript Current transcript to be processed.
  * @returns Returns the transcript with the words replaced based on the word dictionary.
  */
-export function replaceWords(transcript) {
+function replaceWords(transcript) {
     for (let i = 0; i < wordDictionary.length; i++) {
         let searchMask = wordDictionary[i].searchMask;
         let regEx = new RegExp(searchMask, 'ig');
@@ -71,10 +71,25 @@ export function replaceWords(transcript) {
     return transcript;
 }
 
-// module.exports = {
-//     containsDetector,
-//     containsDirection,
-//     getTime,
-//     replaceNonAlphNumericCharacters,
-//     replaceWords
-// };
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function removeSpecialCharacters(string) {
+    return string.replace(/[^a-zA-Z0-9 ]/g, '');
+}
+
+function removeExtraSpaces(string) {
+    return string.replace(/\s+/g, ' ').trim();
+}
+
+export {
+    containsDetector,
+    containsDirection,
+    getTime,
+    replaceNonAlphNumericCharacters,
+    replaceWords,
+    capitalizeFirstLetter,
+    removeSpecialCharacters,
+    removeExtraSpaces
+};

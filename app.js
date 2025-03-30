@@ -6,17 +6,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const router = express.Router();
-
-app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/src/views/index.html');
-});
-
+const port = process.env.PORT || 3000;
 app.use(express.static('src'));
 app.use(express.static('src/views'));
 app.use(express.static('src/public'));
+app.use(express.json());
 
-app.use('/', router);
-app.listen(process.env.port || 3000);
+// Serve the index.html file
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '/src/views/index.html'));
+});
 
-console.log('Running at Port 3000');
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
+
+export default app;
