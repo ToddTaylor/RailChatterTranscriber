@@ -11,22 +11,30 @@ let maxCaptions = 200;
 let maxHotboxCaptions = 100;
 let networkConnectionRetryCount = 0;
 
-let directionIconDictionary = [];
-directionIconDictionary.push(
-    { keyWord: "north", icon: "<i class=\'fa-solid fa-arrow-up fa-sm\' title=\'Northbound\'></i>" },
-    { keyWord: "south", icon: "<i class=\'fa-solid fa-arrow-down fa-sm\' title=\'Southbound\'></i>" },
-    { keyWord: "east", icon: "<i class=\'fa-solid fa-arrow-right fa-sm\' title=\'Eastbound\'></i>" },
-    { keyWord: "west", icon: "<i class=\'fa-solid fa-arrow-left fa-sm\' title=\'Westbound\'></i>" }
-);
+let directionIconDictionary = [
+    { keyWord: "north", icon: "<i class='fa-solid fa-arrow-up fa-sm' title='Northbound'></i>" },
+    { keyWord: "south", icon: "<i class='fa-solid fa-arrow-down fa-sm' title='Southbound'></i>" },
+    { keyWord: "east", icon: "<i class='fa-solid fa-arrow-right fa-sm' title='Eastbound'></i>" },
+    { keyWord: "west", icon: "<i class='fa-solid fa-arrow-left fa-sm' title='Westbound'></i>" }
+];
 
-let detectorDictionary = [];
-detectorDictionary.push(
+let detectorDictionary = [
     { milepost: "94.0", railroad: "cn", location: "Waukesha" },
     { milepost: "108.8", railroad: "cn", location: "Sussex" },
     { milepost: "123.14", railroad: "cn", location: "Slinger" }
-);
+];
 
 window.onload = function onload() {
+    const btnStartListening = document.getElementById('btnStartListening');
+    const btnStopListening = document.getElementById('btnStopListening');
+    const spanMaxCaptionCount = document.getElementById('spanMaxCaptionCount');
+    const spanMaxHotboxCaptionCount = document.getElementById('spanMaxHotboxCaptionCount');
+    const iconWalkieTalkie = document.getElementById('iconWalkieTalkie');
+
+    if (!btnStartListening || !btnStopListening || !spanMaxCaptionCount || !spanMaxHotboxCaptionCount || !iconWalkieTalkie) {
+        console.error("One or more required DOM elements are missing.");
+        return;
+    }
 
     btnStartListening.addEventListener('click', function (e) {
         speechListenerStopped = false;
@@ -45,6 +53,8 @@ window.onload = function onload() {
 }
 
 function detectorLocation(transcript) {
+    if (!transcript) return '';
+
     for (let i = 0; i < detectorDictionary.length; i++) {
         if (transcript.toLowerCase().includes(detectorDictionary[i].milepost)) {
             return '(' + detectorDictionary[i].location + ') ';
@@ -60,6 +70,8 @@ function detectorLocation(transcript) {
  * @returns  Returns the icon based on the keyword in the transcript.
  */
 function directionIcon(transcript) {
+    if (!transcript) return '';
+
     for (let i = 0; i < directionIconDictionary.length; i++) {
         if (transcript.toLowerCase().includes(directionIconDictionary[i].keyWord)) {
             return directionIconDictionary[i].icon;
@@ -70,34 +82,57 @@ function directionIcon(transcript) {
 }
 
 function startSpeechAPI() {
-    if (recognition !== null) {
+    if (typeof recognition !== 'undefined' && recognition !== null) {
         recognition.stop();
         recognition.start();
     } else {
         setupSpeechAPI();
     }
 
-    btnStartListening.disabled = true;
-    btnStopListening.disabled = false;
+    const btnStartListening = document.getElementById('btnStartListening');
+    const btnStopListening = document.getElementById('btnStopListening');
+    const iconWalkieTalkie = document.getElementById('iconWalkieTalkie');
 
-    iconWalkieTalkie.className = 'fa-solid fa-walkie-talkie fa-2xl';
-    iconWalkieTalkie.style.color = '#00ff37';
+    if (btnStartListening) btnStartListening.disabled = true;
+    if (btnStopListening) btnStopListening.disabled = false;
+    if (iconWalkieTalkie) {
+        iconWalkieTalkie.className = 'fa-solid fa-walkie-talkie fa-2xl';
+        iconWalkieTalkie.style.color = '#00ff37';
+    }
+
+    return;
 }
 
 function stopSpeechAPI() {
+    const btnStartListening = document.getElementById('btnStartListening');
+    const btnStopListening = document.getElementById('btnStopListening');
+    const iconWalkieTalkie = document.getElementById('iconWalkieTalkie');
+
     if (recognition !== null) {
         recognition.stop();
     }
 
-    btnStartListening.disabled = false;
-    btnStopListening.disabled = true;
+    if (btnStartListening) btnStartListening.disabled = false;
+    if (btnStopListening) btnStopListening.disabled = true;
 
-    iconWalkieTalkie.className = 'fa-solid fa-walkie-talkie fa-2xl';
-    iconWalkieTalkie.style.color = '#ff0000';
+    if (iconWalkieTalkie) {
+        iconWalkieTalkie.className = 'fa-solid fa-walkie-talkie fa-2xl';
+        iconWalkieTalkie.style.color = '#ff0000';
+    }
+
+    return;
 }
 
 function setupSpeechAPI() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const divCaptions = document.getElementById('divCaptions');
+    const divHotboxCaptions = document.getElementById('divHotboxCaptions');
+
+    if (!divCaptions || !divHotboxCaptions) {
+        console.error("Required DOM elements for captions are missing.");
+        return;
+    }
 
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
@@ -111,7 +146,7 @@ function setupSpeechAPI() {
             let interimTranscript = '';
 
             for (let i = event.resultIndex; i < event.results.length; i++) {
-                let transcript = event.results[i][0].transcript;
+                let transcript = sanitizeHTML(event.results[i][0].transcript);
 
                 if (transcript.trim().length === 0) {
                     continue;
@@ -136,26 +171,44 @@ function setupSpeechAPI() {
 
             // Trim the number of captions to prevent the page from becoming too large.
             if (captionCounter > maxCaptions) {
-                let divCaptionBeforeTrimmedCaptions = '#divCaption' + (captionCounter - maxCaptions);
-                $(divCaptionBeforeTrimmedCaptions).nextAll('div').remove();
+                const divCaptionBeforeTrimmedCaptions = document.getElementById(`divCaption${captionCounter - maxCaptions}`);
+                if (divCaptionBeforeTrimmedCaptions) {
+                    let nextSibling = divCaptionBeforeTrimmedCaptions.nextElementSibling;
+                    while (nextSibling) {
+                        const toRemove = nextSibling;
+                        nextSibling = nextSibling.nextElementSibling;
+                        toRemove.remove();
+                    }
+                }
             }
 
             if (hotboxCaptionCounter > maxHotboxCaptions) {
-                let divCaptionBeforeTrimmedCaptions = '#divHotboxCaption' + (hotboxCaptionCounter - maxHotboxCaptions);
-                $(divCaptionBeforeTrimmedCaptions).nextAll('div').remove();
+                const divCaptionBeforeTrimmedCaptions = document.getElementById(`divHotboxCaption${hotboxCaptionCounter - maxHotboxCaptions}`);
+                if (divCaptionBeforeTrimmedCaptions) {
+                    let nextSibling = divCaptionBeforeTrimmedCaptions.nextElementSibling;
+                    while (nextSibling) {
+                        const toRemove = nextSibling;
+                        nextSibling = nextSibling.nextElementSibling;
+                        toRemove.remove();
+                    }
+                }
             }
         };
 
         recognition.onstart = function () {
-            btnStartListening.disabled = true;
-            btnStopListening.disabled = false;
+            const btnStartListening = document.getElementById('btnStartListening');
+            const btnStopListening = document.getElementById('btnStopListening');
+
+            if (btnStartListening) btnStartListening.disabled = true;
+            if (btnStopListening) btnStopListening.disabled = false;
         }
 
         // Automatically restart the recognition process after it ends (to prevent timeouts)
         recognition.onend = function () {
-            if (!speechListenerStopped) { // If the 'stop listening' button was not explicitly pressed, start listening again.
+            if (!speechListenerStopped && networkConnectionRetryCount < 3) { // If the 'stop listening' button was not explicitly pressed, start listening again.
                 startSpeechAPI();
-                //the API seems to stop listening after ~5 minutes so this keeps it going.
+            } else {
+                console.warn("Speech recognition stopped after multiple retries.");
             }
         };
 
@@ -201,6 +254,14 @@ function setupSpeechAPI() {
     else {
         divCaptions.innerHTML = 'Speech recognition is not supported by this browser.';
     }
+
+    return;
+}
+
+function sanitizeHTML(input) {
+    const tempDiv = document.createElement('div');
+    tempDiv.textContent = input;
+    return tempDiv.innerHTML;
 }
 
 function processDetectorCaption(hotboxTranscript) {

@@ -1,7 +1,6 @@
 // The '.' character is a wildcard in regular expressions.
 // https://regexkit.com/javascript-regex
-let wordDictionary = [];
-wordDictionary.push(
+let wordDictionary = [
     { searchMask: "detector out", replaceWord: "" },
     { searchMask: ".m detector", replaceWord: "CN detector" },
     { searchMask: ".n detector", replaceWord: "CN detector" },
@@ -10,12 +9,11 @@ wordDictionary.push(
     { searchMask: "sector", replaceWord: "detector" },
     { searchMask: "n .ound", replaceWord: "northbound" },
     { searchMask: "north found", replaceWord: "northbound" },
-    { searchMask: "n .ound", replaceWord: "northbound" },
     { searchMask: "s .ound", replaceWord: "southbound" },
     { searchMask: ".ow .ound", replaceWord: "southbound" },
     { searchMask: "south found", replaceWord: "southbound" },
     { searchMask: "thou found", replaceWord: "southbound" },
-);
+];
 
 function containsDetector(transcript) {
     return transcript.toLowerCase().includes('detector');
@@ -24,13 +22,8 @@ function containsDetector(transcript) {
 let directions = ["north", "south", "east", "west"];
 
 function containsDirection(transcript) {
-    for (let i = 0; i < directions.length; i++) {
-        if (transcript.toLowerCase().includes(directions[i])) {
-            return true;
-        }
-    }
-
-    return false;
+    // Simplified loop using Array.prototype.some
+    return directions.some(direction => transcript.toLowerCase().includes(direction));
 }
 
 /**
