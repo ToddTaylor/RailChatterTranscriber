@@ -16,7 +16,9 @@ let wordDictionary = [
 ];
 
 function containsDetector(transcript) {
-    return transcript.toLowerCase().includes('detector');
+    return transcript.toLowerCase().includes('detector') &&
+        transcript.toLowerCase().includes('mile') &&
+        containsNumber(transcript);
 }
 
 let directions = ["north", "south", "east", "west"];
@@ -24,6 +26,10 @@ let directions = ["north", "south", "east", "west"];
 function containsDirection(transcript) {
     // Simplified loop using Array.prototype.some
     return directions.some(direction => transcript.toLowerCase().includes(direction));
+}
+
+function containsNumber(transcript) {
+    return /\d/.test(transcript);
 }
 
 /**
