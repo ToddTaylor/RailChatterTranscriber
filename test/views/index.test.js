@@ -1,26 +1,26 @@
-import { processDetectorCaption } from '../../src/views/index.js';
+import { processDetectorTransript } from '../../src/views/index.js';
 
 // TIP: Use test.only() to run only one test case.
 
 describe('Index Test Cases', () => {
 
-    test('The hotbox text message should be..', () => {
+    test('Defect detector alert in two lines', () => {
         let transcripts =
             [
-                'CN detEctOr',
+                'CN detEctOr mile 108.8.',
                 'N found'
             ];
 
         let expected =
             [
                 '',
-                'CN detector Northbound'
+                'CN detector mile 108.8. Northbound'
             ];
 
         testTranscripts(transcripts, expected);
     });
 
-    test('The hotbox text message should be..', () => {
+    test('Defect detector alert in two lines with details', () => {
         let transcripts =
             [
                 'CN detector mile 108.8.',
@@ -36,7 +36,7 @@ describe('Index Test Cases', () => {
         testTranscripts(transcripts, expected);
     });
 
-    test('The hotbox text message should be..', () => {
+    test('Combination of crew chatter and defect detector alert', () => {
         let transcripts =
             [
                 '19954430 Waukesha so means contained Ave. North.',
@@ -62,16 +62,36 @@ describe('Index Test Cases', () => {
         testTranscripts(transcripts, expected);
     });
 
+    test('Crew chatter that is not a defect detector alert', () => {
+        let transcripts =
+            [
+                'I was just waiting for the detector to finish. I got a northbound coming out Marshall third one.'
+            ];
+
+        var expected =
+            [
+                ''
+            ];
+
+        testTranscripts(transcripts, expected);
+    });
+
     function testTranscripts(transcripts, expected) {
         var actuals = [];
 
         for (let i = 0; i < transcripts.length; i++) {
-            var actual = processDetectorCaption(transcripts[i]);
+            var actual = processDetectorTransript(transcripts[i]);
             actuals.push(actual);
         }
 
         for (let i = 0; i < actuals.length; i++) {
-            expect(actuals[i]).toContain(expected[i]);
+            if (expected[i] == '') {
+                expect(actuals[i]).toBe('');
+            }
+            else {
+                expect(actuals[i]).toBeDefined();
+                expect(actuals[i]).toContain(expected[i])
+            };
         }
     }
 })

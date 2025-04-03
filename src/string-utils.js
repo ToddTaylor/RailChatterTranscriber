@@ -4,7 +4,7 @@ let wordDictionary = [
     { searchMask: "detector out", replaceWord: "" },
     { searchMask: ".m detector", replaceWord: "CN detector" },
     { searchMask: ".n detector", replaceWord: "CN detector" },
-    { searchMask: "end detector", replaceWord: "CN detector" },
+    { searchMask: ".nd detector", replaceWord: "CN detector" },
     { searchMask: "defector", replaceWord: "detector" },
     { searchMask: "sector", replaceWord: "detector" },
     { searchMask: "n .ound", replaceWord: "northbound" },
@@ -15,6 +15,10 @@ let wordDictionary = [
     { searchMask: "thou found", replaceWord: "southbound" },
 ];
 
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 function containsDetector(transcript) {
     return transcript.toLowerCase().includes('detector');
 }
@@ -24,6 +28,10 @@ let directions = ["north", "south", "east", "west"];
 function containsDirection(transcript) {
     // Simplified loop using Array.prototype.some
     return directions.some(direction => transcript.toLowerCase().includes(direction));
+}
+
+function containsNumber(transcript) {
+    return /\d/.test(transcript);
 }
 
 /**
@@ -42,6 +50,12 @@ function getTime() {
     };
 
     return date.toLocaleString('en-US', options);
+}
+
+function isDetectorTranscript(transcript) {
+    return containsDetector(transcript) &&
+        transcript.toLowerCase().includes('mile') &&
+        containsNumber(transcript);
 }
 
 function replaceNonAlphNumericCharacters(transcript) {
@@ -64,10 +78,6 @@ function replaceWords(transcript) {
     return transcript;
 }
 
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 function removeSpecialCharacters(string) {
     return string.replace(/[^a-zA-Z0-9 ]/g, '');
 }
@@ -77,6 +87,7 @@ function removeExtraSpaces(string) {
 }
 
 export {
+    isDetectorTranscript,
     containsDetector,
     containsDirection,
     getTime,

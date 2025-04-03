@@ -1,14 +1,14 @@
-import { containsDirection, containsDetector, capitalizeFirstLetter, getTime, replaceNonAlphNumericCharacters, replaceWords } from '../string-utils.js';
+import { containsDirection, containsDetector, capitalizeFirstLetter, isDetectorTranscript, getTime, replaceNonAlphNumericCharacters, replaceWords } from '../string-utils.js';
 
 let recognition = null;
 let finalTranscript = '';
 let finalHotboxTranscript = '';
 let speechListenerStopped = false;
 let hotboxTranscriptsDictionary = [];
-let captionCounter = 0;
-let hotboxCaptionCounter = 0;
-let maxCaptions = 200;
-let maxHotboxCaptions = 100;
+let TranscriptCounter = 0;
+let hotboxTranscriptCounter = 0;
+let maxTranscripts = 200;
+let maxHotboxTranscripts = 100;
 let networkConnectionRetryCount = 0;
 
 let directionIconDictionary = [
@@ -27,11 +27,11 @@ let detectorDictionary = [
 window.onload = function onload() {
     const btnStartListening = document.getElementById('btnStartListening');
     const btnStopListening = document.getElementById('btnStopListening');
-    const spanMaxCaptionCount = document.getElementById('spanMaxCaptionCount');
-    const spanMaxHotboxCaptionCount = document.getElementById('spanMaxHotboxCaptionCount');
+    const spanMaxTranscriptCount = document.getElementById('spanMaxTranscriptCount');
+    const spanMaxHotboxTranscriptCount = document.getElementById('spanMaxHotboxTranscriptCount');
     const iconWalkieTalkie = document.getElementById('iconWalkieTalkie');
 
-    if (!btnStartListening || !btnStopListening || !spanMaxCaptionCount || !spanMaxHotboxCaptionCount || !iconWalkieTalkie) {
+    if (!btnStartListening || !btnStopListening || !spanMaxTranscriptCount || !spanMaxHotboxTranscriptCount || !iconWalkieTalkie) {
         console.error("One or more required DOM elements are missing.");
         return;
     }
@@ -46,8 +46,8 @@ window.onload = function onload() {
         stopSpeechAPI();
     });
 
-    spanMaxCaptionCount.innerHTML = maxCaptions;
-    spanMaxHotboxCaptionCount.innerHTML = maxHotboxCaptions;
+    spanMaxTranscriptCount.innerHTML = maxTranscripts;
+    spanMaxHotboxTranscriptCount.innerHTML = maxHotboxTranscripts;
 
     setupSpeechAPI();
 }
@@ -126,11 +126,11 @@ function stopSpeechAPI() {
 function setupSpeechAPI() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    const divCaptions = document.getElementById('divCaptions');
-    const divHotboxCaptions = document.getElementById('divHotboxCaptions');
+    const divTranscripts = document.getElementById('divTranscripts');
+    const divHotboxTranscripts = document.getElementById('divHotboxTranscripts');
 
-    if (!divCaptions || !divHotboxCaptions) {
-        console.error("Required DOM elements for captions are missing.");
+    if (!divTranscripts || !divHotboxTranscripts) {
+        console.error("Required DOM elements for Transcripts are missing.");
         return;
     }
 
@@ -154,26 +154,26 @@ function setupSpeechAPI() {
 
                 if (event.results[i].isFinal) {
                     // Transcript is "cloned" before passing into detector function.  See https://stackoverflow.com/a/59293003/4297541
-                    finalHotboxTranscript = processDetectorCaption(`${transcript}`) + finalHotboxTranscript;
-                    finalTranscript = '<div id=\'divCaption' + captionCounter + '\'>' + spanTimestamp() + signalSourceIconChooser(transcript) + ' ' + transcript + '</div>' + finalTranscript;
+                    finalHotboxTranscript = processDetectorTransript(`${transcript}`) + finalHotboxTranscript;
+                    finalTranscript = '<div id=\'divTranscript' + TranscriptCounter + '\'>' + spanTimestamp() + signalSourceIconChooser(transcript) + ' ' + transcript + '</div>' + finalTranscript;
                 } else {
                     interimTranscript += transcript;
                 }
             }
 
             if (interimTranscript) {
-                divCaptions.innerHTML = '<div><i style=\'color:#999999;\'>' + interimTranscript + '</i>' + finalTranscript;
+                divTranscripts.innerHTML = '<div><i style=\'color:#999999;\'>' + interimTranscript + '</i>' + finalTranscript;
             } else {
-                divCaptions.innerHTML = finalTranscript;
-                divHotboxCaptions.innerHTML = finalHotboxTranscript;
-                captionCounter++;
+                divTranscripts.innerHTML = finalTranscript;
+                divHotboxTranscripts.innerHTML = finalHotboxTranscript;
+                TranscriptCounter++;
             }
 
-            // Trim the number of captions to prevent the page from becoming too large.
-            if (captionCounter > maxCaptions) {
-                const divCaptionBeforeTrimmedCaptions = document.getElementById(`divCaption${captionCounter - maxCaptions}`);
-                if (divCaptionBeforeTrimmedCaptions) {
-                    let nextSibling = divCaptionBeforeTrimmedCaptions.nextElementSibling;
+            // Trim the number of Transcripts to prevent the page from becoming too large.
+            if (TranscriptCounter > maxTranscripts) {
+                const divTranscriptBeforeTrimmedTranscripts = document.getElementById(`divTranscript${TranscriptCounter - maxTranscripts}`);
+                if (divTranscriptBeforeTrimmedTranscripts) {
+                    let nextSibling = divTranscriptBeforeTrimmedTranscripts.nextElementSibling;
                     while (nextSibling) {
                         const toRemove = nextSibling;
                         nextSibling = nextSibling.nextElementSibling;
@@ -182,10 +182,10 @@ function setupSpeechAPI() {
                 }
             }
 
-            if (hotboxCaptionCounter > maxHotboxCaptions) {
-                const divCaptionBeforeTrimmedCaptions = document.getElementById(`divHotboxCaption${hotboxCaptionCounter - maxHotboxCaptions}`);
-                if (divCaptionBeforeTrimmedCaptions) {
-                    let nextSibling = divCaptionBeforeTrimmedCaptions.nextElementSibling;
+            if (hotboxTranscriptCounter > maxHotboxTranscripts) {
+                const divTranscriptBeforeTrimmedTranscripts = document.getElementById(`divHotboxTranscript${hotboxTranscriptCounter - maxHotboxTranscripts}`);
+                if (divTranscriptBeforeTrimmedTranscripts) {
+                    let nextSibling = divTranscriptBeforeTrimmedTranscripts.nextElementSibling;
                     while (nextSibling) {
                         const toRemove = nextSibling;
                         nextSibling = nextSibling.nextElementSibling;
@@ -232,7 +232,7 @@ function setupSpeechAPI() {
                 if (networkConnectionRetryCount < 3) {
                     stopSpeechAPI();
                     error += ' Network error occurred. Retrying...';
-                    divCaptions.innerHTML = error;
+                    divTranscripts.innerHTML = error;
                     networkConnectionRetryCount++;
                     startSpeechAPI();
                     return;
@@ -244,7 +244,7 @@ function setupSpeechAPI() {
                 error += 'An unknown error occurred: ' + event.error;
             }
 
-            divCaptions.innerHTML = '<div>' + error + '</div>' + finalTranscript;
+            divTranscripts.innerHTML = '<div>' + error + '</div>' + finalTranscript;
             speechListenerStopped = true;
             stopSpeechAPI();
         };
@@ -252,7 +252,7 @@ function setupSpeechAPI() {
         recognition.start();
     }
     else {
-        divCaptions.innerHTML = 'Speech recognition is not supported by this browser.';
+        divTranscripts.innerHTML = 'Speech recognition is not supported by this browser.';
     }
 
     return;
@@ -264,23 +264,23 @@ function sanitizeHTML(input) {
     return tempDiv.innerHTML;
 }
 
-function processDetectorCaption(hotboxTranscript) {
+function processDetectorTransript(hotboxTranscript) {
 
     hotboxTranscript = replaceWords(hotboxTranscript);
     hotboxTranscript = replaceNonAlphNumericCharacters(hotboxTranscript);
 
-    let transcriptContainsDetector = containsDetector(hotboxTranscript);
+    let transcriptIsDetector = isDetectorTranscript(hotboxTranscript);
     let transcriptContainsDirection = containsDirection(hotboxTranscript);
 
-    if (!transcriptContainsDetector && !transcriptContainsDirection) {
+    if (!transcriptIsDetector && !transcriptContainsDirection) {
         return '';
     }
 
     // Determine the key for the dictionary entry based on what is found in the transcript.
     let key = '';
-    if (transcriptContainsDetector && transcriptContainsDirection) {
+    if (transcriptIsDetector && transcriptContainsDirection) {
         key = 'both';
-    } else if (transcriptContainsDetector) {
+    } else if (transcriptIsDetector) {
         key = 'detector';
     } else if (transcriptContainsDirection) {
         // If there's a direction but no detector, check if the dictionary contains "detector" already.
@@ -323,16 +323,16 @@ function processDetectorCaption(hotboxTranscript) {
             bothTranscript = '<span style=\'color:#999999;\'>' + bothTranscript + '</spon>';
         }
 
-        let baseHotboxCaption = spanTowerBroadCastIcon() + directionIcon(bothTranscript) + ' ' + bothTranscript;
-        let hotboxTranscriptHTML = `<div id='divHotboxCaption${hotboxCaptionCounter}'>${baseHotboxCaption}</div>`;
+        let baseHotboxTranscript = spanTowerBroadCastIcon() + directionIcon(bothTranscript) + ' ' + bothTranscript;
+        let hotboxTranscriptHTML = `<div id='divHotboxTranscript${hotboxTranscriptCounter}'>${baseHotboxTranscript}</div>`;
 
-        hotboxCaptionCounter++;
+        hotboxTranscriptCounter++;
         hotboxTranscriptsDictionary = [];
 
         return hotboxTranscriptHTML.trim();
     }
 
-    // If queue has more than 5 items and no valid captions, clear the queue.
+    // If queue has more than 5 items and no valid Transcripts, clear the queue.
     if (hotboxTranscriptsDictionary.length > 5) {
         hotboxTranscriptsDictionary = [];
     }
@@ -360,4 +360,4 @@ function signalSourceIconChooser(transcript) {
     return '<i class=\'fa-solid fa-walkie-talkie fa-sm\' title=\'Walkie-Talkie\'></i>';
 }
 
-export { processDetectorCaption };
+export { processDetectorTransript };

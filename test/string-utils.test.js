@@ -2,12 +2,10 @@
 import {
     containsDetector,
     containsDirection,
+    isDetectorTranscript,
     getTime,
     replaceNonAlphNumericCharacters,
-    replaceWords,
-    capitalizeFirstLetter,
-    removeSpecialCharacters,
-    removeExtraSpaces
+    replaceWords
 } from '../src/string-utils.js';
 
 describe("String-Utils Test Cases", () => {
@@ -19,10 +17,10 @@ describe("String-Utils Test Cases", () => {
         expect(result).toBe(true);
     });
 
-    test("Does not contain 'detector'", () => {
+    test("Is not a detector transcript", () => {
         let transcript = "I have 2 apples and 3 oranges";
 
-        var result = containsDetector(transcript);
+        var result = isDetectorTranscript(transcript);
 
         expect(result).toBe(false);
     });
@@ -81,11 +79,19 @@ describe("String-Utils Test Cases", () => {
         expect(result).toBe('There are  in this sentence');
     });
 
-    test("Does not contain a direction", () => {
+    test("Replace Cow Sounds with southbound", () => {
         let transcript = "This is a Cow Sound and not a train";
 
         var result = replaceWords(transcript);
 
         expect(result).toBe('This is a southbound and not a train');
+    });
+
+    test("Replace And with CN", () => {
+        let transcript = "And detector mile 123.14.";
+
+        var result = replaceWords(transcript);
+
+        expect(result).toBe('CN detector mile 123.14.');
     });
 });
