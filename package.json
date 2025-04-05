@@ -5,9 +5,10 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test": "jest",
+    "build": "babel src -d public/js",
+    "build:prod": "npm install && babel src -d public/js",
     "start": "node app.js",
-    "build": "babel src -d public/js"
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
