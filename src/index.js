@@ -1,4 +1,4 @@
-import { containsDirection, containsDetector, capitalizeFirstLetter, isDetectorTranscript, getTime, replaceNonAlphNumericCharacters, replaceWords } from '../string-utils.js';
+import { containsDirection, containsDetector, capitalizeFirstLetter, isDetectorTranscript, getTime, replaceNonAlphNumericCharacters, replaceWords } from './string-utils.js';
 
 let recognition = null;
 let finalTranscript = '';

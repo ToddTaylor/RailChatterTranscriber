@@ -7,14 +7,12 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
-app.use(express.static('src'));
-app.use(express.static('src/views'));
-app.use(express.static('src/public'));
+app.use(express.static('public'));
 app.use(express.json());
 
 // Serve the index.html file
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/src/views/index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(port, () => {
