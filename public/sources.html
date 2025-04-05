@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Rail Chatter Transcriber Sources</title>
+</head>
+
+<body>
+    <H2>CN Waukesha Sub - Sussex</H2>
+    <audio id="myAudio" controls>
+        <source src="https://broadcastify.cdnstream1.com/44698" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+    <br>
+    <H2>CN Waukesha Sub - Slinger</H2>
+    <div id="player"></div>
+    <script>
+        const audioElement = document.getElementById('myAudio');
+
+        // Ensuring that the audio starts playing automatically when the page loads
+        window.onload = function () {
+            // Set loop to true so the audio plays continuously
+            audioElement.loop = true;
+
+            // Start playing the audio
+            audioElement.play().catch(function (error) {
+                console.log('Error starting audio:', error);
+                console.log('Please ensure autoplay is enabled in your browser for this site.');
+            });
+        };
+
+        // If the audio is paused or ended, resume playing
+        audioElement.addEventListener('pause', function () {
+            console.log('Audio paused, resuming...');
+            audioElement.play();
+        });
+
+        audioElement.addEventListener('ended', function () {
+            console.log('Audio ended, restarting...');
+            audioElement.play();
+        });
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        // This function creates an <iframe> (and YouTube player) after the API code downloads.
+        var player;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                videoId: 'owcG3NhmZ38', // Replace with your live YouTube video ID
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // The API will call this function when the player is ready.
+        function onPlayerReady(event) {
+            event.target.playVideo(); // Start the video when it's ready
+        }
+
+        // Handle state changes to ensure the video remains playing
+        function onPlayerStateChange(event) {
+            // If the video is paused, ensure it continues playing
+            if (event.data === YT.PlayerState.PAUSED) {
+                event.target.playVideo(); // Resume video playback if it was paused
+            }
+        }
+    </script>
+</body>
+
+</html>
