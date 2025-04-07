@@ -1,4 +1,4 @@
-import { processDetectorTransript } from '../../src/views/index.js';
+import { processDetectorTransript } from '../src/index.js';
 
 // TIP: Use test.only() to run only one test case.
 
@@ -70,6 +70,26 @@ describe('Index Test Cases', () => {
 
         var expected =
             [
+                ''
+            ];
+
+        testTranscripts(transcripts, expected);
+    });
+
+    test('Sussex detector alert', () => {
+        let transcripts =
+            [
+                'CN detector mile 108.8.',
+                'North found no defects. Temperature 37F.',
+                'Total axle 368, Speed 24.',
+                'Detector out.'
+            ];
+
+        var expected =
+            [
+                '',
+                '(Sussex) CN detector mile 108.8. Northbound no defects. Temperature 37F.',
+                '',
                 ''
             ];
 

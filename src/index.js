@@ -154,8 +154,12 @@ function setupSpeechAPI() {
 
                 if (event.results[i].isFinal) {
                     // Transcript is "cloned" before passing into detector function.  See https://stackoverflow.com/a/59293003/4297541
-                    finalHotboxTranscript = processDetectorTransript(`${transcript}`) + finalHotboxTranscript;
-                    finalTranscript = '<div id=\'divTranscript' + TranscriptCounter + '\'>' + spanTimestamp() + signalSourceIconChooser(transcript) + ' ' + transcript + '</div>' + finalTranscript;
+                    let hotboxTranscript = processDetectorTransript(`${transcript}`);
+                    if (hotboxTranscript) {
+                        sendBrowserNotification(hotboxTranscript);
+                        finalHotboxTranscript = htmlFormatHotboxTranscript(hotboxTranscript) + finalHotboxTranscript;
+                    }
+                    finalTranscript = htmlFormatTranscript(transcript) + finalTranscript;
                 } else {
                     interimTranscript += transcript;
                 }
@@ -258,6 +262,33 @@ function setupSpeechAPI() {
     return;
 }
 
+function htmlFormatTranscript(transcript) {
+    return '<div id=\'divTranscript' + TranscriptCounter + '\'>' + spanTimestamp() + signalSourceIconChooser(transcript) + ' ' + transcript + '</div>';
+}
+
+function sendBrowserNotification(body) {
+    if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+            const title = 'Hot Box Detector Alert!';
+            const options = {
+                body: body,
+                icon: '../images/fab.jpeg',
+                requireInteraction: false,
+            };
+            new Notification(title, options);
+        }
+        else if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(function (permission) {
+                if (permission === 'granted') {
+                    new Notification('You have granted notification permission.');
+                }
+            });
+        }
+    } else {
+        console.log('Notifications are not supported by this browser.');
+    }
+}
+
 function sanitizeHTML(input) {
     const tempDiv = document.createElement('div');
     tempDiv.textContent = input;
@@ -316,20 +347,12 @@ function processDetectorTransript(hotboxTranscript) {
 
     if (bothTranscript) {
 
-        bothTranscript = detectorLocation(bothTranscript) + bothTranscript;
-
-        let isEndOfTrainTranscript = bothTranscript.toLocaleLowerCase().includes('temperature') || bothTranscript.includes('axles') || bothTranscript.includes('defects') || bothTranscript.includes('speed')
-        if (isEndOfTrainTranscript) {
-            bothTranscript = '<span style=\'color:#999999;\'>' + bothTranscript + '</spon>';
-        }
-
-        let baseHotboxTranscript = spanTowerBroadCastIcon() + directionIcon(bothTranscript) + ' ' + bothTranscript;
-        let hotboxTranscriptHTML = `<div id='divHotboxTranscript${hotboxTranscriptCounter}'>${baseHotboxTranscript}</div>`;
-
         hotboxTranscriptCounter++;
         hotboxTranscriptsDictionary = [];
 
-        return hotboxTranscriptHTML.trim();
+        bothTranscript = detectorLocation(bothTranscript) + bothTranscript;
+
+        return bothTranscript.trim();
     }
 
     // If queue has more than 5 items and no valid Transcripts, clear the queue.
@@ -338,6 +361,26 @@ function processDetectorTransript(hotboxTranscript) {
     }
 
     return '';
+}
+
+/**
+ * Add the hotbox and direction icon to beginning of transcript. Format the end of train transcript with a dark 
+ * grey text as it's not the primary hotmbox notification.
+ * @param {*} transcript Hotbox trainscript to be formatted.
+ * @returns HTML formatted transcript with icons.
+ */
+function htmlFormatHotboxTranscript(transcript) {
+    if (!transcript) return '';
+
+    let isEndOfTrainTranscript = transcript.toLocaleLowerCase().includes('temperature') || transcript.includes('axles') || transcript.includes('defects') || transcript.includes('speed');
+    if (isEndOfTrainTranscript) {
+        transcript = '<span style=\'color:#999999;\'>' + transcript.trim() + '</spon>';
+    }
+
+    let transcriptWithIcons = spanTowerBroadCastIcon() + directionIcon(transcript) + ' ' + transcript;
+    let htmlTranscript = `<div id='divHotboxTranscript${hotboxTranscriptCounter}'>${transcriptWithIcons}</div>`;
+
+    return htmlTranscript;
 }
 
 function spanErrorIcon() {
@@ -353,7 +396,15 @@ function spanTimestamp() {
 }
 
 function signalSourceIconChooser(transcript) {
-    if (transcript.toLowerCase().includes('detector')) {
+    let detectorPoints = 0;
+    if (transcript.toLowerCase().includes('detector')) { detectorPoints++; }
+    if (transcript.toLowerCase().includes('mile')) { detectorPoints++; }
+    if (transcript.toLowerCase().includes('defects')) { detectorPoints++; }
+    if (transcript.toLowerCase().includes('axle')) { detectorPoints++; }
+    if (transcript.toLowerCase().includes('speed')) { detectorPoints++; }
+    if (transcript.toLowerCase().includes('temperature')) { detectorPoints++; }
+
+    if (detectorPoints >= 2) {
         return '<i class=\'fa-solid fa-tower-broadcast fa-sm\' title=\'Hot Box Detector\'></i>';
     }
 
