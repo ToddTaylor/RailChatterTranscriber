@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "babel src -d public/js",
-    "build:prod": "npm install && babel src -d public/js",
+    "build:prod": "npm install && babel src -d public/js --minified",
     "start": "node app.js",
     "test": "jest"
   },
