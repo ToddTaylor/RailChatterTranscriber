@@ -1,4 +1,4 @@
-import { wordDictionary } from './data-dictionaries.js';
+import { directions, wordDictionary } from './data-dictionaries.js';
 
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -8,10 +8,7 @@ function containsDetector(transcript) {
     return transcript.toLowerCase().includes('detector');
 }
 
-let directions = ["north", "south", "east", "west"];
-
 function containsDirection(transcript) {
-    // Simplified loop using Array.prototype.some
     return directions.some(direction => transcript.toLowerCase().includes(direction));
 }
 

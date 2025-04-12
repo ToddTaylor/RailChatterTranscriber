@@ -144,7 +144,8 @@ function setupSpeechAPI() {
                     // Transcript is "cloned" before passing into detector function.  See https://stackoverflow.com/a/59293003/4297541
                     let hotboxTranscript = processDetectorTransript(`${transcript}`);
                     if (hotboxTranscript) {
-                        sendBrowserNotification(hotboxTranscript);
+                        let icon = getBrowserNotificationIcon(hotboxTranscript);
+                        sendBrowserNotification(hotboxTranscript, icon);
                         finalHotboxTranscript = htmlFormatHotboxTranscript(hotboxTranscript) + finalHotboxTranscript;
                     }
                     finalTranscript = htmlFormatTranscript(transcript) + finalTranscript;
@@ -254,13 +255,36 @@ function htmlFormatTranscript(transcript) {
     return '<div id=\'divTranscript' + TranscriptCounter + '\'>' + spanTimestamp() + signalSourceIconChooser(transcript) + ' ' + transcript + '</div>';
 }
 
-function sendBrowserNotification(body) {
+function getBrowserNotificationIcon(body) {
+
+    let icon = '../images/icon_question.png';
+
+    if (body.toLocaleLowerCase().includes('north')) {
+        icon = '../images/icon_arrow_up.png';
+    }
+
+    if (body.toLocaleLowerCase().includes('south')) {
+        icon = '../images/icon_arrow_down.png';
+    }
+
+    if (body.toLocaleLowerCase().includes('east')) {
+        icon = '../images/icon_arrow_right.png';
+    }
+
+    if (body.toLocaleLowerCase().includes('west')) {
+        icon = '../images/icon_arrow_left.png';
+    }
+
+    return icon;
+}
+
+function sendBrowserNotification(body, icon) {
     if ('Notification' in window) {
         if (Notification.permission === 'granted') {
             const title = 'Hot Box Detector Alert!';
             const options = {
                 body: body,
-                icon: '../images/fab.jpeg',
+                icon: icon,
                 requireInteraction: false,
             };
             new Notification(title, options);
