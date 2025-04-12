@@ -1,4 +1,5 @@
-import { containsDirection, containsDetector, capitalizeFirstLetter, isDetectorTranscript, getTime, replaceNonAlphNumericCharacters, replaceWords } from './string-utils.js';
+import { containsDirection, capitalizeFirstLetter, isDetectorTranscript, getTime, replaceNonAlphNumericCharacters, replaceWords } from './string-utils.js';
+import { detectorDictionary, directionIconDictionary, wordDictionary } from './data-dictionaries.js';
 
 let recognition = null;
 let finalTranscript = '';
@@ -10,19 +11,6 @@ let hotboxTranscriptCounter = 0;
 let maxTranscripts = 200;
 let maxHotboxTranscripts = 100;
 let networkConnectionRetryCount = 0;
-
-let directionIconDictionary = [
-    { keyWord: "north", icon: "<i class='fa-solid fa-arrow-up fa-sm' title='Northbound'></i>" },
-    { keyWord: "south", icon: "<i class='fa-solid fa-arrow-down fa-sm' title='Southbound'></i>" },
-    { keyWord: "east", icon: "<i class='fa-solid fa-arrow-right fa-sm' title='Eastbound'></i>" },
-    { keyWord: "west", icon: "<i class='fa-solid fa-arrow-left fa-sm' title='Westbound'></i>" }
-];
-
-let detectorDictionary = [
-    { milepost: "94.0", railroad: "cn", location: "Waukesha" },
-    { milepost: "108.8", railroad: "cn", location: "Sussex" },
-    { milepost: "123.14", railroad: "cn", location: "Slinger" }
-];
 
 window.onload = function onload() {
     const btnStartListening = document.getElementById('btnStartListening');

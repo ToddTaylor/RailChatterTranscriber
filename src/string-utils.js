@@ -1,19 +1,4 @@
-// The '.' character is a wildcard in regular expressions.
-// https://regexkit.com/javascript-regex
-let wordDictionary = [
-    { searchMask: "detector out", replaceWord: "" },
-    { searchMask: ".m detector", replaceWord: "CN detector" },
-    { searchMask: ".n detector", replaceWord: "CN detector" },
-    { searchMask: ".nd detector", replaceWord: "CN detector" },
-    { searchMask: "defector", replaceWord: "detector" },
-    { searchMask: "sector", replaceWord: "detector" },
-    { searchMask: "n .ound", replaceWord: "northbound" },
-    { searchMask: "north found", replaceWord: "northbound" },
-    { searchMask: "s .ound", replaceWord: "southbound" },
-    { searchMask: ".ow .ound", replaceWord: "southbound" },
-    { searchMask: "south found", replaceWord: "southbound" },
-    { searchMask: "thou found", replaceWord: "southbound" },
-];
+import { wordDictionary } from './data-dictionaries.js';
 
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
