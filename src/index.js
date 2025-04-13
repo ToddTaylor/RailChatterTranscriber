@@ -1,5 +1,6 @@
-import { containsDirection, capitalizeFirstLetter, isDetectorTranscript, getTime, replaceNonAlphNumericCharacters, replaceWords } from './string-utils.js';
-import { detectorDictionary, directionIconDictionary, wordDictionary } from './data-dictionaries.js';
+import { containsDirection, capitalizeFirstLetter, findDirection, isDetectorTranscript, getTime, replaceNonAlphNumericCharacters, replaceWords } from './string-utils.js';
+import { detectorDictionary, directionIconDictionary } from './data-dictionaries.js';
+import { isTrainApproaching } from './compass.js';
 
 let recognition = null;
 let finalTranscript = '';
@@ -50,6 +51,21 @@ function detectorLocation(transcript) {
     }
 
     return '';
+}
+
+function detectorFromTranscriptMilepost(transcript) {
+    let detectorPoint = null;
+
+    if (!transcript) return detectorPoint;
+
+    for (let i = 0; i < detectorDictionary.length; i++) {
+        if (transcript.toLowerCase().includes(detectorDictionary[i].milepost)) {
+            detectorPoint = detectorDictionary[i].point;
+            break;
+        }
+    }
+
+    return detectorPoint;
 }
 
 /**
@@ -111,14 +127,14 @@ function stopSpeechAPI() {
     return;
 }
 
-function setupSpeechAPI() {
+async function setupSpeechAPI() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     const divTranscripts = document.getElementById('divTranscripts');
     const divHotboxTranscripts = document.getElementById('divHotboxTranscripts');
 
     if (!divTranscripts || !divHotboxTranscripts) {
-        console.error("Required DOM elements for Transcripts are missing.");
+        console.error("Required DOM elements for transcripts are missing.");
         return;
     }
 
@@ -128,6 +144,8 @@ function setupSpeechAPI() {
         recognition.continuous = true;
         recognition.interimResults = true;
         recognition.maxAlternatives = 10;
+
+        const userLocationPoint = await getUserLocation();
 
         recognition.onresult = function (event) {
 
@@ -144,10 +162,19 @@ function setupSpeechAPI() {
                     // Transcript is "cloned" before passing into detector function.  See https://stackoverflow.com/a/59293003/4297541
                     let hotboxTranscript = processDetectorTransript(`${transcript}`);
                     if (hotboxTranscript) {
-                        let icon = getBrowserNotificationIcon(hotboxTranscript);
-                        sendBrowserNotification(hotboxTranscript, icon);
+
+                        const detectorPoint = detectorFromTranscriptMilepost(hotboxTranscript);
+                        console.log("Detector Point: ", detectorPoint);
+                        const direction = findDirection(hotboxTranscript)
+
+                        if (isTrainApproaching(userLocationPoint, detectorPoint, direction)) {
+                            const icon = getBrowserNotificationIcon(direction);
+                            sendBrowserNotification(hotboxTranscript, icon);
+                        }
+
                         finalHotboxTranscript = htmlFormatHotboxTranscript(hotboxTranscript) + finalHotboxTranscript;
                     }
+
                     finalTranscript = htmlFormatTranscript(transcript) + finalTranscript;
                 } else {
                     interimTranscript += transcript;
@@ -255,24 +282,30 @@ function htmlFormatTranscript(transcript) {
     return '<div id=\'divTranscript' + TranscriptCounter + '\'>' + spanTimestamp() + signalSourceIconChooser(transcript) + ' ' + transcript + '</div>';
 }
 
-function getBrowserNotificationIcon(body) {
+/**
+ * Converts direction to a browser notification icon.
+ * @param {*} direction Must be north, south, east, or west.
+ * @returns Appropriate icon for the direction.
+ */
+function getBrowserNotificationIcon(direction) {
 
     let icon = '../images/icon_question.png';
 
-    if (body.toLocaleLowerCase().includes('north')) {
-        icon = '../images/icon_arrow_up.png';
-    }
-
-    if (body.toLocaleLowerCase().includes('south')) {
-        icon = '../images/icon_arrow_down.png';
-    }
-
-    if (body.toLocaleLowerCase().includes('east')) {
-        icon = '../images/icon_arrow_right.png';
-    }
-
-    if (body.toLocaleLowerCase().includes('west')) {
-        icon = '../images/icon_arrow_left.png';
+    switch (direction) {
+        case 'north':
+            icon = '../images/icon_arrow_up.png';
+            break;
+        case 'south':
+            icon = '../images/icon_arrow_down.png';
+            break;
+        case 'east':
+            icon = '../images/icon_arrow_right.png';
+            break;
+        case 'west':
+            icon = '../images/icon_arrow_left.png';
+            break;
+        default:
+            icon = '../images/icon_question.png';
     }
 
     return icon;
@@ -421,6 +454,27 @@ function signalSourceIconChooser(transcript) {
     }
 
     return '<i class=\'fa-solid fa-walkie-talkie fa-sm\' title=\'Walkie-Talkie\'></i>';
+}
+
+function getUserLocation() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error("Geolocation is not supported by your browser"));
+        } else {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const point = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    resolve(point);
+                },
+                (error) => {
+                    reject(new Error("Unable to retrieve location: " + error.message));
+                }
+            );
+        }
+    });
 }
 
 export { processDetectorTransript };

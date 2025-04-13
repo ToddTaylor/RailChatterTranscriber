@@ -2,6 +2,7 @@
 import {
     containsDetector,
     containsDirection,
+    findDirection,
     isDetectorTranscript,
     getTime,
     replaceNonAlphNumericCharacters,
@@ -63,6 +64,14 @@ describe("String-Utils Test Cases", () => {
         var result = containsDirection(transcript);
 
         expect(result).toBe(false);
+    });
+
+    test("Find direction 'north' in transcript", () => {
+        let transcript = "CN detEctOr northbound";
+
+        var result = findDirection(transcript);
+
+        expect(result).toBe('north');
     });
 
     test("Timestamp matches HH:MM:SS AM|PM format", () => {

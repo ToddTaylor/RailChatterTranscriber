@@ -8,8 +8,25 @@ function containsDetector(transcript) {
     return transcript.toLowerCase().includes('detector');
 }
 
+/**
+ * Determines if the transcript contains a direction.
+ * @param {string} transcript Current transcript to be processed.
+ * @returns Returns true if the transcript contains a direction, false otherwise.
+ * @example If string is "Let's go north", it will return true.
+ * @example If string is "There are no directions in this sentence", it will return false.
+ */
 function containsDirection(transcript) {
     return directions.some(direction => transcript.toLowerCase().includes(direction));
+}
+
+/**
+ * Finds the first direction in the transcript.
+ * @param {string} transcript Current transcript to be processed.
+ * @returns First direction found in the transcript or null if none found.
+ * @example If string is "Let's go north", it will return "north".
+ */
+function findDirection(transcript) {
+    return directions.find(value => transcript.includes(value)) || null;
 }
 
 function containsNumber(transcript) {
@@ -72,6 +89,7 @@ export {
     isDetectorTranscript,
     containsDetector,
     containsDirection,
+    findDirection,
     getTime,
     replaceNonAlphNumericCharacters,
     replaceWords,

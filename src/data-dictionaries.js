@@ -6,9 +6,9 @@ let directionIconDictionary = [
 ];
 
 let detectorDictionary = [
-    { milepost: "94.0", railroad: "cn", location: "Waukesha", latitude: 42.960378, longitude: -88.240401 },
-    { milepost: "108.8", railroad: "cn", location: "Sussex", latitude: 43.162204, longitude: -88.200229 },
-    { milepost: "123.14", railroad: "cn", location: "Slinger", latitude: 43.338023, longitude: -88.290851 }
+    { milepost: "94.0", railroad: "cn", location: "Waukesha", point: { latitude: 42.960378, longitude: -88.240401 } },
+    { milepost: "108.8", railroad: "cn", location: "Sussex", point: { latitude: 43.162204, longitude: -88.200229 } },
+    { milepost: "123.14", railroad: "cn", location: "Slinger", point: { latitude: 43.338023, longitude: -88.290851 } }
 ];
 
 // The '.' character is a wildcard in regular expressions.
