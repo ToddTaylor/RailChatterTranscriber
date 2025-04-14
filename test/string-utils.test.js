@@ -2,7 +2,7 @@
 import {
     containsDetector,
     containsDirection,
-    findDirection,
+    getDirectionFromTranscript,
     isDetectorTranscript,
     getTime,
     replaceNonAlphNumericCharacters,
@@ -69,7 +69,7 @@ describe("String-Utils Test Cases", () => {
     test("Find direction 'north' in transcript", () => {
         let transcript = "CN detEctOr northbound";
 
-        var result = findDirection(transcript);
+        var result = getDirectionFromTranscript(transcript);
 
         expect(result).toBe('north');
     });

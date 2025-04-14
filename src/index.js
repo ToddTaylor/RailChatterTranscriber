@@ -1,4 +1,4 @@
-import { containsDirection, capitalizeFirstLetter, findDirection, isDetectorTranscript, getTime, replaceNonAlphNumericCharacters, replaceWords } from './string-utils.js';
+import { containsDirection, capitalizeFirstLetter, getDirectionFromTranscript, isDetectorTranscript, getTime, replaceNonAlphNumericCharacters, replaceWords } from './string-utils.js';
 import { detectorDictionary, directionIconDictionary } from './data-dictionaries.js';
 import { isTrainApproaching } from './compass.js';
 
@@ -41,31 +41,16 @@ window.onload = function onload() {
     setupSpeechAPI();
 }
 
-function detectorLocation(transcript) {
-    if (!transcript) return '';
+function getDetectorByMilePost(transcript) {
+    if (!transcript) return null;
 
     for (let i = 0; i < detectorDictionary.length; i++) {
         if (transcript.toLowerCase().includes(detectorDictionary[i].milepost)) {
-            return '(' + detectorDictionary[i].location + ') ';
+            return detectorDictionary[i];
         }
     }
 
-    return '';
-}
-
-function detectorFromTranscriptMilepost(transcript) {
-    let detectorPoint = null;
-
-    if (!transcript) return detectorPoint;
-
-    for (let i = 0; i < detectorDictionary.length; i++) {
-        if (transcript.toLowerCase().includes(detectorDictionary[i].milepost)) {
-            detectorPoint = detectorDictionary[i].point;
-            break;
-        }
-    }
-
-    return detectorPoint;
+    return null;
 }
 
 /**
@@ -163,13 +148,14 @@ async function setupSpeechAPI() {
                     let hotboxTranscript = processDetectorTransript(`${transcript}`);
                     if (hotboxTranscript) {
 
-                        const detectorPoint = detectorFromTranscriptMilepost(hotboxTranscript);
-                        console.log("Detector Point: ", detectorPoint);
-                        const direction = findDirection(hotboxTranscript)
+                        const detector = getDetectorByMilePost(hotboxTranscript);
+                        const direction = getDirectionFromTranscript(hotboxTranscript)
 
-                        if (isTrainApproaching(userLocationPoint, detectorPoint, direction)) {
-                            const icon = getBrowserNotificationIcon(direction);
-                            sendBrowserNotification(hotboxTranscript, icon);
+                        if (detector && direction) {
+                            if (isTrainApproaching(userLocationPoint, detector.point, direction)) {
+                                const icon = getBrowserNotificationIcon(direction);
+                                sendBrowserNotification(hotboxTranscript, icon);
+                            }
                         }
 
                         finalHotboxTranscript = htmlFormatHotboxTranscript(hotboxTranscript) + finalHotboxTranscript;
@@ -395,7 +381,10 @@ function processDetectorTransript(hotboxTranscript) {
         hotboxTranscriptCounter++;
         hotboxTranscriptsDictionary = [];
 
-        bothTranscript = detectorLocation(bothTranscript) + bothTranscript;
+        let detector = getDetectorByMilePost(bothTranscript);
+        if (detector) {
+            bothTranscript = '(' + detector.location + ') ' + bothTranscript;
+        }
 
         return bothTranscript.trim();
     }

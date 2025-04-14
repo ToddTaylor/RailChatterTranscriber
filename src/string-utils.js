@@ -25,7 +25,7 @@ function containsDirection(transcript) {
  * @returns First direction found in the transcript or null if none found.
  * @example If string is "Let's go north", it will return "north".
  */
-function findDirection(transcript) {
+function getDirectionFromTranscript(transcript) {
     return directions.find(value => transcript.includes(value)) || null;
 }
 
@@ -89,7 +89,7 @@ export {
     isDetectorTranscript,
     containsDetector,
     containsDirection,
-    findDirection,
+    getDirectionFromTranscript,
     getTime,
     replaceNonAlphNumericCharacters,
     replaceWords,

@@ -36,9 +36,7 @@ function getRelativeDirection(point1, point2) {
 
 function isTrainApproaching(home, detector, trainDirection) {
     let approaching = false;
-    console.log("Home: ", home);
-    console.log("Detector: ", detector);
-    console.log("Train Direction: ", trainDirection);
+
     const detectorRelativeDirection = getRelativeDirection(home, detector);
 
     const isNorthbound = trainDirection.toLowerCase().includes("north");
